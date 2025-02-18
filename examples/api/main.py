@@ -26,8 +26,6 @@ import torch
 from pydantic import BaseModel
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from tools.normalizer.en import normalizer_en_nemo_text
-from tools.normalizer.zh import normalizer_zh_tn
 
 logger = get_logger("Command")
 
@@ -39,8 +37,6 @@ async def startup_event():
     global chat
 
     chat = ChatTTS.Chat(get_logger("ChatTTS"))
-    chat.normalizer.register("en", normalizer_en_nemo_text())
-    chat.normalizer.register("zh", normalizer_zh_tn())
 
     logger.info("Initializing ChatTTS...")
     if chat.load(source="huggingface"):
@@ -63,7 +59,7 @@ class ChatTTSParams(BaseModel):
     skip_refine_text: bool = False
     refine_text_only: bool = False
     use_decoder: bool = True
-    do_text_normalization: bool = True
+    do_text_normalization: bool = False
     do_homophone_replacement: bool = False
     params_refine_text: ChatTTS.Chat.RefineTextParams = None
     params_infer_code: ChatTTS.Chat.InferCodeParams
