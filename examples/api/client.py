@@ -59,18 +59,21 @@ params_infer_code = {
 }
 body["params_infer_code"] = params_infer_code
 
-
 try:
     response = requests.post(CHATTTS_URL, json=body)
     response.raise_for_status()
-    with zipfile.ZipFile(BytesIO(response.content), "r") as zip_ref:
-        # save files for each request in a different folder
-        dt = datetime.datetime.now()
-        ts = int(dt.timestamp())
-        tgt = f"./output/{ts}/"
-        os.makedirs(tgt, 0o755)
-        zip_ref.extractall(tgt)
-        print("Extracted files into", tgt)
+
+    # 创建输出目录
+    dt = datetime.datetime.now()
+    ts = int(dt.timestamp())
+    tgt = f"./output/{ts}/"
+    os.makedirs(tgt, exist_ok=True)
+
+    # 保存 MP3 文件
+    output_file = os.path.join(tgt, "output.mp3")
+    with open(output_file, "wb") as f:
+        f.write(response.content)
+    print("Saved MP3 file to", output_file)
 
 except requests.exceptions.RequestException as e:
     print(f"Request Error: {e}")

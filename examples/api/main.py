@@ -2,6 +2,7 @@ import io
 import os
 import sys
 import zipfile
+import numpy as np
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
@@ -104,16 +105,9 @@ async def generate_voice(params: ChatTTSParams):
     )
     logger.info("Inference completed.")
 
-    # zip all of the audio files together
-    buf = io.BytesIO()
-    with zipfile.ZipFile(
-        buf, "a", compression=zipfile.ZIP_DEFLATED, allowZip64=False
-    ) as f:
-        for idx, wav in enumerate(wavs):
-            f.writestr(f"{idx}.mp3", pcm_arr_to_mp3_view(wav))
-    logger.info("Audio generation successful.")
-    buf.seek(0)
+    combined_wav = np.concatenate(wavs, axis=0)
+    mp3_data = pcm_arr_to_mp3_view(combined_wav)
 
-    response = StreamingResponse(buf, media_type="application/zip")
-    response.headers["Content-Disposition"] = "attachment; filename=audio_files.zip"
+    response = StreamingResponse(io.BytesIO(mp3_data), media_type="audio/mpeg")
+    response.headers["Content-Disposition"] = "attachment; filename=audio.mp3"
     return response
