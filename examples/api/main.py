@@ -6,6 +6,7 @@ import numpy as np
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 
 if sys.platform == "darwin":
@@ -30,7 +31,18 @@ from fastapi.responses import JSONResponse
 logger = get_logger("Command")
 
 app = FastAPI()
-
+# 添加 CORS 中间件配置
+app.add_middleware(
+    CORSMiddleware,
+    # 允许所有源
+    allow_origins=["*"],
+    # 允许所有凭证（cookies等）
+    allow_credentials=True,
+    # 允许所有方法（GET, POST, PUT等）
+    allow_methods=["*"],
+    # 允许所有请求头
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 async def startup_event():
